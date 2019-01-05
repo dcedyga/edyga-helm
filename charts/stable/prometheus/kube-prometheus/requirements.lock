@@ -1,0 +1,39 @@
+dependencies:
+- name: alertmanager
+  repository: file://../alertmanager
+  version: 0.1.7
+- name: prometheus
+  repository: file://../prometheus
+  version: 0.0.51
+- name: exporter-coredns
+  repository: file://../exporter-coredns
+  version: 0.0.3
+- name: exporter-kube-controller-manager
+  repository: file://../exporter-kube-controller-manager
+  version: 0.1.10
+- name: exporter-kube-dns
+  repository: file://../exporter-kube-dns
+  version: 0.1.7
+- name: exporter-kube-etcd
+  repository: file://../exporter-kube-etcd
+  version: 0.1.15
+- name: exporter-kube-scheduler
+  repository: file://../exporter-kube-scheduler
+  version: 0.1.9
+- name: exporter-kube-state
+  repository: file://../exporter-kube-state
+  version: 0.2.6
+- name: exporter-kubelets
+  repository: file://../exporter-kubelets
+  version: 0.2.11
+- name: exporter-kubernetes
+  repository: file://../exporter-kubernetes
+  version: 0.1.10
+- name: exporter-node
+  repository: file://../exporter-node
+  version: 0.4.6
+- name: grafana
+  repository: file://../grafana
+  version: 0.0.37
+digest: sha256:e8eb5bea18ad550125b420c742e55da64fb4fed05a67bd71d230c9c876a9b867
+generated: 2018-12-25T08:53:22.136138Z

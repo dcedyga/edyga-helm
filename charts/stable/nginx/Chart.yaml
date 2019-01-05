@@ -1,0 +1,8 @@
+name: nginx
+description: Nginx server
+version: 1.0.0
+keywords:
+  - web server
+maintainers:
+  - name: davidcarbajosatesoro
+    email: david.carbajosa@pleyadesltd.com

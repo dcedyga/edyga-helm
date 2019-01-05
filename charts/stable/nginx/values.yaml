@@ -1,0 +1,143 @@
+# Default values for nginx.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+image:
+  repository: nginx
+  tag: latest
+  # If using a private repository, the name of the imagePullSecret to use
+  # pullSecret: my-repo-secret
+service:
+  type: LoadBalancer
+  externalPort: 80
+  internalPort: 80
+  annotations:
+  # May be used in example for internal load balancing in GCP:
+  # cloud.google.com/load-balancer-type: Internal
+  loadBalancerSourceRanges:
+  - 0.0.0.0/0
+  # loadBalancerIP: 1.2.3.4
+nginx:
+  restartPolicy: Always
+  env: []
+  resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+  port: 80
+  readinessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    failureThreshold: 6
+    path: /
+  livenessProbe:
+    initialDelaySeconds: 60
+    periodSeconds: 30
+    failureThreshold: 6
+    path: /
+  conf: |
+    user nginx;
+    worker_processes 2;
+    error_log /var/log/nginx/error.log;
+    events { 
+      worker_connections 1024; 
+    }
+    http {
+        proxy_intercept_errors off;
+        proxy_send_timeout 120;
+        proxy_read_timeout 300;
+        log_format  main
+                'remote_addr:$remote_addr\t'
+                'time_local:$time_local\t'
+                'method:$request_method\t'
+                'uri:$request_uri\t'
+                'host:$host\t'
+                'status:$status\t'
+                'bytes_sent:$body_bytes_sent\t'
+                'referrer:$http_referrer\t'
+                'useragent:$http_user_agent\t'
+                'forwardedfor:$http_x_forwarded_for\t'
+                'request_time:$request_time\t';
+        access_log  /var/log/nginx/access.log main;
+        server {
+            listen        80;
+            server_name   _;
+            location / {
+                root  /usr/share/nginx/html/;
+                index index.html index.htm;
+            }
+        }
+        include /etc/nginx/virtualhost/virtualhost.conf;
+    }
+  virtualhost:
+    conf: |
+      upstream app {
+          server localhost:8080;
+          keepalive 1024;
+      }
+      server {
+          listen 80 default_server;
+          root /usr/local/app;
+          error_log /var/log/nginx/app_error.log;
+          access_log /var/log/nginx/app_access.log main;
+          location / {
+              proxy_pass         http://app;
+              proxy_http_version 1.1;
+          }
+      }
+
+  
+ingress:
+  enabled: false
+  # Used to create an Ingress record.
+  #hosts:
+  #  - host: www.abc.com
+  #    paths:
+  #      - path: /
+  #        backend: 
+  #          serviceName: abcService
+  #          servicePort: 80
+  #      - path: /*
+  #        backend: 
+  #          serviceName: abcService
+  #          servicePort: 80
+  #annotations:
+  ## kubernetes.io/ingress.class: nginx
+  ## kubernetes.io/tls-acme: "true"
+  ## This property allows for reports up to a certain size to be uploaded to SonarQube
+  ## nginx.ingress.kubernetes.io/proxy-body-size: "8m"
+  #tls:
+  ## Secrets must be manually created in the namespace.
+  ## - secretName: chart-example-tls
+  ##   hosts:
+  ##     - chart-example.local
+
+# Affinity for pod assignment
+# Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+affinity: {}
+
+# Tolerations for pod assignment
+# Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: []
+
+# Node labels for pod assignment
+# Ref: https://kubernetes.io/docs/user-guide/node-selection/
+nodeSelector: {}
+
+# hostAliases allows the modification of the hosts file inside a container
+hostAliases: []
+# - ip: "192.168.1.10"
+#   hostnames:
+#   - "example.com"
+#   - "www.example.com"
+
+
+
+

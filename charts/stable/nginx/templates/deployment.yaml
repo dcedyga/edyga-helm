@@ -1,0 +1,90 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "nginx.fullname" . }}
+  labels:
+    app: {{ template "nginx.fullname". }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "nginx.fullname" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: nginx
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          restartPolicy: {{ .Values.nginx.restartPolicy }}
+          {{- if .Values.nginx.env }}
+          env:
+{{ toYaml .Values.nginx.env  | indent 12 }}
+          {{- end }}
+          resources:
+{{ toYaml .Values.nginx.resources | indent 12 }}
+          ports:
+            - containerPort: {{ .Values.nginx.port }}
+              name: nginx-http
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.nginx.livenessProbe.path }}
+              port: {{ .Values.nginx.port }}
+            initialDelaySeconds: {{ .Values.nginx.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.nginx.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.nginx.livenessProbe.failureThreshold }}
+            {{- if .Values.nginx.livenessProbe.timeoutSeconds }}
+            timeoutSeconds: {{ .Values.nginx.livenessProbe.timeoutSeconds }}
+            {{- end }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.nginx.readinessProbe.path }}
+              port: {{ .Values.nginx.port }}
+            initialDelaySeconds: {{ .Values.nginx.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.nginx.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.nginx.readinessProbe.failureThreshold }}
+            {{- if .Values.nginx.readinessProbe.timeoutSeconds }}
+            timeoutSeconds: {{ .Values.nginx.readinessProbe.timeoutSeconds }}
+            {{- end }}
+          volumeMounts:
+            - mountPath: /etc/nginx
+              readOnly: true
+              name: {{ template "nginx.fullname" . }}-config
+            - mountPath: /var/log/nginx
+              name: {{ template "nginx.fullname" . }}-log
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.hostAliases }}
+      hostAliases:
+{{ toYaml .Values.hostAliases | indent 8 }}
+    {{- end }}
+    {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+    {{- end }}
+    {{- if .Values.affinity }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+    {{- end }}
+    {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets}}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}
+      volumes:
+      - name:  {{ template "nginx.fullname" . }}-config
+        configMap:
+          name: {{ template "nginx.fullname" . }}-config
+          items:
+          - key: nginx.conf
+            path: nginx.conf
+          - key: virtualhost.conf
+            path: virtualhost/virtualhost.conf 
+      - name:  {{ template "nginx.fullname" . }}-log
+        emptyDir: {}      

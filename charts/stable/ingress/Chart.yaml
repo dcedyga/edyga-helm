@@ -1,0 +1,9 @@
+name: ingress
+description: Ingress single entry poing
+version: 1.0.0
+keywords:
+  - routing
+  - kubernetes
+maintainers:
+  - name: davidcarbajosatesoro
+    email: david.carbajosa@pleyadesltd.com
