@@ -1,0 +1,79 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kiali-operator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "kiali-operator.name" . }}
+    chart: {{ template "kiali-operator.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+    version: {{ .Values.kialiOperator.version }}
+spec:
+  replicas: {{ .Values.kialiOperator.replicaCount }}
+  selector:
+    matchLabels:
+      app: kiali-operator
+      version: {{ .Values.kialiOperator.version }}
+  template:
+    metadata:
+      name: kiali-operator
+      namespace: {{ .Release.Namespace }}
+      labels:
+        app: kiali-operator
+        chart: {{ template "kiali-operator.chart" . }}
+        heritage: {{ .Release.Service }}
+        release: {{ .Release.Name }}
+        version: {{ .Values.kialiOperator.version }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+        scheduler.alpha.kubernetes.io/critical-pod: ""
+    spec:
+      serviceAccountName: kiali-operator-sa
+{{- if .Values.kialiOperator.priorityClassName }}
+      priorityClassName: "{{ .Values.kialiOperator.priorityClassName }}"
+{{- end }}
+      containers:
+      - name: ansible
+        command:
+        - /usr/local/bin/ao-logs
+        - /tmp/ansible-operator/runner
+        - stdout
+        image: "{{ .Values.kialiOperator.image }}:{{ .Values.kialiOperator.version }}"
+        imagePullPolicy: {{ .Values.kialiOperator.imagePullPolicy }}
+        restartPolicy: {{ .Values.kialiOperator.restartPolicy }}
+        volumeMounts:
+        - mountPath: /tmp/ansible-operator/runner
+          name: runner
+          readOnly: true
+      - name: operator
+        image: "{{ .Values.kialiOperator.image }}:{{ .Values.kialiOperator.version }}"
+        imagePullPolicy: {{ .Values.kialiOperator.imagePullPolicy }}
+        volumeMounts:
+        - mountPath: /tmp/ansible-operator/runner
+          name: runner
+        env:
+        - name: WATCH_NAMESPACE
+          value: ""
+          #valueFrom:
+          #  fieldRef:
+          #    apiVersion: v1
+          #    fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: OPERATOR_NAME
+          value: "kiali-operator"
+        resources:
+{{- if .Values.resources }}
+{{ toYaml .Values.resources | indent 10 }}
+{{- end }}
+      volumes:
+      - name: runner
+        emptyDir: {}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}

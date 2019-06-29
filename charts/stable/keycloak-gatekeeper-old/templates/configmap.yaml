@@ -1,0 +1,13 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "keycloak-gatekeeper.fullname" . }}-page-templates
+  labels:
+{{ include "keycloak-gatekeeper.labels" . | indent 4 }}
+data:
+  forbidden-page: |
+{{ .Values.proxyOptions.userFriendlyPages.forbiddenPageTemplate | default ( include "defaultForbiddenPage" . ) | indent 4 }}
+  login-page: |
+{{ .Values.proxyOptions.userFriendlyPages.loginPageTemplate | default ( include "defaultLoginPage" . ) | indent 4 }}
+...

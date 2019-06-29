@@ -1,0 +1,15 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "atlassian-jira-software.fullname" . }}-config
+  labels:
+    app: {{ template "atlassian-jira-software.fullname" . }}
+    chart: {{ template "atlassian-jira-software.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  {{- if .Values.jiraconfig.properties }}
+  jira-config.properties: |
+{{ .Values.jiraconfig.properties | indent 4}}
+  {{- end }}

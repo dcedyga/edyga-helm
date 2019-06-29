@@ -1,0 +1,90 @@
+{{- if .Values.isGrafanaIstio -}}
+apiVersion: v1
+kind: ServiceAccount
+{{- if .Values.image.pullSecrets }}
+imagePullSecrets:
+{{- range .Values.image.pullSecrets }}
+  - name: {{ . }}
+{{- end }}
+{{- end }}
+metadata:
+  name: {{ template "grafana.fullname" . }}-post-install-account
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "grafana.fullname" . }}
+    chart: {{ template "grafana.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "grafana.fullname" . }}-post-install-{{ .Release.Namespace }}
+  labels:
+    app: {{ template "grafana.fullname" . }}
+    chart: {{ template "grafana.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+rules:
+- apiGroups: ["authentication.istio.io"] # needed to create default authn policy
+  resources: ["*"]
+  verbs: ["*"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "grafana.fullname" . }}-post-install-role-binding-{{ .Release.Namespace }}
+  labels:
+    app: {{ template "grafana.name" . }}
+    chart: {{ template "grafana.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "grafana.fullname" . }}-post-install-{{ .Release.Namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ template "grafana.fullname" . }}-post-install-account
+    namespace: {{ .Release.Namespace }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "grafana.fullname" . }}-post-install-{{ .Values.istio.tag | printf "%v" | trunc 32 }}
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": post-install
+    "helm.sh/hook-delete-policy": hook-succeeded
+  labels:
+    app: {{ template "grafana.name" . }}
+    chart: {{ template "grafana.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  template:
+    metadata:
+      name: {{ template "grafana.fullname" . }}-post-install
+      labels:
+        app: {{ template "grafana.fullname" . }}
+        chart: {{ template "grafana.chart" . }}
+        heritage: {{ .Release.Service }}
+        release: {{ .Release.Name }}
+    spec:
+      serviceAccountName: {{ template "grafana.fullname" . }}-post-install-account
+      containers:
+        - name: kubectl
+          image: "{{ .Values.istio.hub }}/kubectl:{{ .Values.istio.tag }}"
+          command: [ "/bin/bash", "/tmp/grafana/run.sh", "/tmp/grafana/custom-resources.yaml" ]
+          volumeMounts:
+            - mountPath: "/tmp/grafana"
+              name: tmp-configmap-grafana
+      volumes:
+        - name: tmp-configmap-grafana
+          configMap:
+            name: {{ template "grafana.fullname" . }}-custom-resources
+      restartPolicy: OnFailure
+      affinity:
+      {{- include "nodeaffinity" . | indent 6 }}
+      {{- include "podAntiAffinity" . | indent 6 }}
+{{- end -}}

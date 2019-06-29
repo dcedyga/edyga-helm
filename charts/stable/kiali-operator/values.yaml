@@ -1,0 +1,11 @@
+
+
+kialiOperator:
+  version: v1.0.0-snapshot.0
+  image: quay.io/kiali/kiali-operator
+  replicaCount: 1
+  priorityClassName: ""
+  imagePullPolicy: IfNotPresent
+  restartPolicy: Always
+  imagePullSecrets:
+affinity: {}

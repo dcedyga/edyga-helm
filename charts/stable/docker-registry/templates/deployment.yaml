@@ -72,6 +72,18 @@ spec:
             - name: REGISTRY_AUTH_HTPASSWD_PATH
               value: "/auth/htpasswd"
 {{- end }}
+{{- if .Values.auth.enabled }}
+            #- name: REGISTRY_AUTH
+            #  value: token
+            - name: REGISTRY_AUTH_TOKEN_REALM
+              value: {{ .Values.auth.token.realm }}
+            - name: REGISTRY_AUTH_TOKEN_SERVICE
+              value: {{ .Values.auth.token.service }}
+            - name: REGISTRY_AUTH_TOKEN_ISSUER
+              value: {{ .Values.auth.token.issuer }}
+            - name: REGISTRY_AUTH_TOKEN_ROOTCERTBUNDLE
+              value: /opt/certs/trust_chain.pem   
+{{- end }}
             - name: REGISTRY_HTTP_SECRET
               valueFrom:
                 secretKeyRef:
@@ -160,6 +172,11 @@ spec:
               name: tls-cert
               readOnly: true
 {{- end }}
+{{- if .Values.auth.enabled }}
+            - mountPath: /opt/certs/
+              name: auth-tls-cert
+              readOnly: true
+{{- end }}
 {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
@@ -193,4 +210,9 @@ spec:
         - name: tls-cert
           secret:
             secretName: {{ .Values.tlsSecretName }}
+{{- end }}
+{{- if .Values.auth.enabled }}
+        - name: auth-tls-cert
+          secret:
+            secretName: {{ .Values.auth.tlsSecretName }}
 {{- end }}

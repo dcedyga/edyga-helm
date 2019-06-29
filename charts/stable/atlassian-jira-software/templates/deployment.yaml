@@ -61,6 +61,11 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/atlassian/jira
+          {{- if .Values.jiraconfig.properties }}
+            - name: config-volume
+              mountPath: /var/atlassian/jira/jira-config.properties
+              subPath: jira-config.properties
+          {{- end }}
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
@@ -76,6 +81,11 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
       volumes:
+      {{- if .Values.jiraconfig.properties }}
+        - name:  config-volume
+          configMap:
+            name: {{ template "atlassian-jira-software.fullname" . }}-config
+      {{- end }}
         - name: data
         {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:

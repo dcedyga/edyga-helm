@@ -59,6 +59,14 @@ persistence:
 # set the type of filesystem to use: filesystem, s3
 storage: filesystem
 
+auth:
+  enabled: false
+#  token:
+#    realm: 
+#    issuer:
+#    service:
+#  tlsSecretName:
+
 # Set this to name of secret for tls certs
 # tlsSecretName: registry.docker.example.com
 secrets:

@@ -1,0 +1,134 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "grafana.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "grafana.fullname" . }}
+    chart: {{ template "grafana.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "grafana.fullname" . }}
+        chart: {{ template "grafana.chart" . }}
+        heritage: {{ .Release.Service }}
+        release: {{ .Release.Name }}
+      annotations:
+{{- with .Values.annotations }}
+{{ toYaml . | indent 8 }}
+{{- end }} 
+    spec:
+      #securityContext:
+      #  privileged: true
+      securityContext:
+        runAsUser: 0
+        fsGroup: 0
+{{- if .Values.priorityClassName }}
+      priorityClassName: "{{ .Values.priorityClassName }}"
+{{- end }}
+{{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+{{- range .Values.image.pullSecrets }}
+        - name: {{ . }}
+{{- end }}
+{{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.imagePullPolicy }}
+          ports:
+          - containerPort: 3000
+          readinessProbe:
+            httpGet:
+              path: /login
+              port: 3000
+          env:
+          - name: GRAFANA_PORT
+            value: "3000"
+{{- if .Values.security.enabled }}
+          - name: GF_SECURITY_ADMIN_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.security.secretName }}
+                key: {{ .Values.security.usernameKey }}
+          - name: GF_SECURITY_ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.security.secretName }}
+                key: {{ .Values.security.passphraseKey }}
+          - name: GF_AUTH_BASIC_ENABLED
+            value: "true"
+          - name: GF_AUTH_ANONYMOUS_ENABLED
+            value: "false"
+          - name: GF_AUTH_DISABLE_LOGIN_FORM
+            value: "false"
+{{- else }}
+          - name: GF_AUTH_BASIC_ENABLED
+            value: "false"
+          - name: GF_AUTH_ANONYMOUS_ENABLED
+            value: "true"
+          - name: GF_AUTH_ANONYMOUS_ORG_ROLE
+            value: Admin
+{{- end }}
+          - name: GF_PATHS_DATA
+            value: /data/grafana
+{{- if .Values.plugins }}
+          - name: GF_INSTALL_PLUGINS
+            valueFrom:
+              configMapKeyRef:
+                name: {{ template "grafana.fullname" . }}
+                key: plugins
+{{- end }}
+          resources:
+{{- if .Values.resources }}
+{{ toYaml .Values.resources | indent 12 }}
+{{- end }}
+          volumeMounts:
+          - name: data
+            mountPath: /data/grafana
+          - name: config
+            mountPath: "/etc/grafana/grafana.ini"
+            subPath: grafana.ini
+          {{- $mountpath := .Values.dashboards.mountPath -}}
+          {{- range $path, $bytes := .Files.Glob .Values.dashboards.path }}
+          {{- $filename := trimSuffix (ext $path) (base $path) }}
+          - name: dashboards-{{ $filename }}
+            mountPath: "{{ $mountpath }}/{{ base $path }}"
+            subPath: {{ base $path }}
+            readOnly: true
+          {{- end }}
+          - name: config
+            mountPath: "/etc/grafana/provisioning/datasources/datasources.yaml"
+            subPath: datasources.yaml
+          - name: config
+            mountPath: "/etc/grafana/provisioning/dashboards/dashboardproviders.yaml"
+            subPath: dashboardproviders.yaml
+          {{- if .Values.notifiers }}
+          - name: config
+            mountPath: "/etc/grafana/provisioning/notifiers/notifiers.yaml"
+            subPath: notifiers.yaml
+          {{- end }}
+      affinity:
+      {{- include "nodeaffinity" . | indent 6 }}
+      {{- include "podAntiAffinity" . | indent 6 }}
+      volumes:
+      - name: config
+        configMap:
+          name: {{ template "grafana.fullname" . }}
+      - name: data
+{{- if .Values.persist }}
+        persistentVolumeClaim:
+          claimName: {{ template "grafana.fullname" . }}-pvc
+{{- else }}
+        emptyDir: {}
+{{- end }}
+{{- range $path, $bytes := .Files.Glob .Values.dashboards.path }}
+{{- $filename := trimSuffix (ext $path) (base $path) }}
+      - name: dashboards-{{ $filename }}
+        configMap:
+          name: {{ $.Release.Name }}-configuration-dashboards-{{ $filename }}
+{{- end }}

@@ -1,0 +1,18 @@
+{{- $files := .Files }}
+{{- range $path, $bytes := .Files.Glob .Values.dashboards.path }}
+{{- $filename := trimSuffix (ext $path) (base $path) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $.Release.Name }}-configuration-dashboards-{{ $filename }}
+  namespace: {{ $.Release.Namespace }}
+  labels:
+    app: {{ template "grafana.name" $ }}
+    chart: {{ template "grafana.chart" $ }}
+    heritage: {{ $.Release.Service }}
+    release: {{ $.Release.Name }}
+    istio: {{ $.Release.Name }}
+data:
+  {{ base $path }}: '{{ $files.Get $path }}'
+---
+{{- end }}

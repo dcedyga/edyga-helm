@@ -1,0 +1,53 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "smtp.fullname" . }}
+  labels:
+    app: {{ template "smtp.fullname". }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "smtp.fullname" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: smtp-relay
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          restartPolicy: {{ .Values.smtp.restartPolicy }}
+          {{- if .Values.smtp.env }}
+          env:
+{{ toYaml .Values.smtp.env  | indent 12 }}
+          {{- end }}
+          resources:
+{{ toYaml .Values.smtp.resources | indent 12 }}
+          ports:
+            - containerPort: {{ .Values.smtp.port }}
+              name: smtp
+{{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+    {{- end }}
+    {{- if .Values.hostAliases }}
+      hostAliases:
+{{ toYaml .Values.hostAliases | indent 8 }}
+    {{- end }}
+    {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+    {{- end }}
+    {{- if .Values.affinity }}
+      affinity:
+{{ toYaml .Values.affinity | indent 8 }}
+    {{- end }}
+    {{- if .Values.image.pullSecrets }}
+      imagePullSecrets:
+      {{- range .Values.image.pullSecrets}}
+      - name: {{ . }}
+      {{- end }}
+    {{- end }}      

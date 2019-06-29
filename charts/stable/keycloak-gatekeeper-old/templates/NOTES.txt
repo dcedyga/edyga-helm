@@ -1,0 +1,5 @@
+keycloak-gatekeeper is now ready, in front of URL {{ .Values.upstreamUrl }}. You can now:
+- Check out the status of the keycloak-gatekeeper deployment: `kubectl describe deployment {{ include "keycloak-gatekeeper.fullname" . }}`
+- Access keycloak-gatekeeper internally, at service {{ include "keycloak-gatekeeper.fullname" . }}, port {{ .Values.service.port }}
+{{ if .Values.ingress.enabled }}- Access keycloak-gatekeeper externally, at names: {{ .Values.ingress.hosts | join "," }}{{ end }}
+{{ if .Values.ingress.tls }}- Access or write out the TLS secrets, in the objects: {{ range .Values.ingress.tls }}{{ .secretName }}, {{ end }} {{ end }}

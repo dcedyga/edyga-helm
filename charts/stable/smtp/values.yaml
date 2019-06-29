@@ -1,0 +1,98 @@
+# Default values for nginx.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+replicaCount: 1
+image:
+  repository: namshi/smtp
+  tag: latest
+  # If using a private repository, the name of the imagePullSecret to use
+  # pullSecret: my-repo-secret
+service:
+  type: LoadBalancer
+  externalPort: 25
+  internalPort: 25
+  annotations:
+  # May be used in example for internal load balancing in GCP:
+  # cloud.google.com/load-balancer-type: Internal
+  loadBalancerSourceRanges:
+  - 0.0.0.0/0
+  # loadBalancerIP: 1.2.3.4
+smtp:
+  restartPolicy: Always
+  env: []
+  ## MUST start with : e.g RELAY_NETWORKS=:192.168.0.0/24:10.0.0.0/16
+  ## if acting as a relay this or RELAY_DOMAINS must be filled out or incoming mail will be rejected
+  #- name: RELAY_NETWORKS
+  #  value: 192.168.0.0/24
+  ## what domains should be accepted to forward to lower distance MX server.
+  #- name: RELAY_DOMAINS
+  #  value: "<domain1> : <domain2> : <domain3>"
+  #- name: GMAIL_USER
+  #  value: user@gmail.com
+  #- name: GMAIL_PASSWORD
+  #  value: <pwd>
+  #- name: SES_USER
+  #  value: <user>
+  #- name: SES_PASSWORD
+  #  value: <pwd>
+  #- name: SES_REGION
+  #  value: <aws_region>
+  ## if provided will enable TLS support
+  #- name: KEY_PATH
+  #  value: <key>
+  #- name: CERTIFICATE_PATH
+  #  value: <cert>
+  ## the outgoing mail hostname
+  #- name: MAILNAME
+  #  value: <domain_name>
+  ## set this to any value to disable ipv6
+  #- name: DISABLE_IPV6
+  #  value: <true|false>
+  ## Generic SMTP Relay
+  #- name: SMARTHOST_ADDRESS
+  #  value: <address>
+  #- name: SMARTHOST_PORT
+  #  value: <port>
+  #- name: SMARTHOST_USER
+  #  value: <user>
+  #- name: SMARTHOST_PASSWORD
+  #  value: <pwd>
+  #- name: SMARTHOST_ALIASES
+  #  value: <aliases>
+  resources: {}
+  # # MUST start with : e.g RELAY_NETWORKS=:192.168.0.0/24:10.0.0.0/16
+  # # if acting as a relay this or RELAY_DOMAINS must be filled out or incoming mail will be rejected
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #  cpu: 100m
+  #  memory: 128Mi
+  # requests:
+  #  cpu: 100m
+  #  memory: 128Mi
+  port: 25
+  
+# Affinity for pod assignment
+# Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+affinity: {}
+
+# Tolerations for pod assignment
+# Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+tolerations: []
+
+# Node labels for pod assignment
+# Ref: https://kubernetes.io/docs/user-guide/node-selection/
+nodeSelector: {}
+
+# hostAliases allows the modification of the hosts file inside a container
+hostAliases: []
+# - ip: "192.168.1.10"
+#   hostnames:
+#   - "example.com"
+#   - "www.example.com"
+
+
+
+

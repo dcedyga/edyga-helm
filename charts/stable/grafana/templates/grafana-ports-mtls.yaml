@@ -1,0 +1,18 @@
+{{ define "grafana-default.yaml.tpl" }}
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ template "grafana.fullname" . }}-ports-mtls-disabled
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "grafana.fullname" . }}
+    chart: {{ template "grafana.chart" . }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  targets:
+  - name: {{ template "grafana.fullname" . }}
+    ports:
+    - number: {{ .Values.service.externalPort }}
+{{- end }}
+

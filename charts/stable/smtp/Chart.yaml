@@ -1,0 +1,8 @@
+name: smtp
+description: SMTP server
+version: 1.0.0
+keywords:
+  - smtp server
+maintainers:
+  - name: davidcarbajosatesoro
+    email: david.carbajosa@pleyadesltd.com

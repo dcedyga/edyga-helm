@@ -19,6 +19,7 @@ rules:
   resources:
   - nodes
   - services
+  - nodes/proxy
   - endpoints
   - pods
   verbs: ["get", "list", "watch"]
@@ -30,6 +31,11 @@ rules:
   resources:
   - nodes/metrics
   verbs: ["get"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
 - nonResourceURLs: ["/metrics"]
   verbs: ["get"]
 {{- end }}

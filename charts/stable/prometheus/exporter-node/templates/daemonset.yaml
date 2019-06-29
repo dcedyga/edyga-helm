@@ -21,6 +21,8 @@ spec:
         - name: node-exporter
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          securityContext:
+            privileged: true
           args:
           - --web.listen-address=0.0.0.0:{{ .Values.service.containerPort }}
           {{- if and .Values.container .Values.container.args }}

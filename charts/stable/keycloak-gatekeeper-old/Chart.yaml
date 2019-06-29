@@ -1,0 +1,15 @@
+apiVersion: v1
+name: helm-keycloak-gatekeeper
+version: 0.6.0
+kubeVersion: ">=1.10.0"
+description: Authenticating proxy, based on keycloak/keycloak-gatekeeper
+keyworkds:
+- sso
+- oidc
+- openid
+- keycloak
+home: https://github.com/mvitale1989/helm-keycloak-gatekeeper
+maintainers:
+- name: mvitale1989
+  email: mvitale1989@hotmail.com
+appVersion: "5.0.0"
