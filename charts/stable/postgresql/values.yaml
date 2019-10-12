@@ -55,7 +55,7 @@ replication:
   user: repl_user
   password: repl_password
   slaveReplicas: 1
-
+postgresqlInitDBArgs: --encoding=UTF8
 ## PostgreSQL admin user
 ## ref: https://github.com/bitnami/bitnami-docker-postgresql/blob/master/README.md#setting-the-root-password-on-first-run
 postgresqlUsername: postgres

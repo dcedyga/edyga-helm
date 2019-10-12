@@ -1,7 +1,7 @@
 
 
 kialiOperator:
-  version: v1.0.0-snapshot.0
+  version: v1.6.1
   image: quay.io/kiali/kiali-operator
   replicaCount: 1
   priorityClassName: ""

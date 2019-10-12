@@ -99,6 +99,8 @@ spec:
               name: {{ template "postgresql.fullname" . }}
               key: postgresql-replication-password
         {{- end }}
+        - name: POSTGRES_INITDB_ARGS
+          value: {{ .Values.postgresqlInitDBArgs | quote }}
         - name: POSTGRESQL_USERNAME
           value: {{ .Values.postgresqlUsername | quote }}
         - name: POSTGRESQL_PASSWORD

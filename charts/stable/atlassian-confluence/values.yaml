@@ -15,6 +15,8 @@ confluence:
   javaOptions: ""
   runUser: root
   runGroup: root
+  #runUID: 0
+  #runGID: 0
 synchrony:
   ## disable Synchrony by default
   javaHeapSize: 0m

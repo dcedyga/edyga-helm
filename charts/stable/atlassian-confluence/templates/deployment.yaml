@@ -21,10 +21,25 @@ spec:
         app: {{ template "atlassian-confluence.name" . }}
         release: {{ .Release.Name }}
     spec:
+      initContainers:
+        - name: chown-data-volume
+          image: busybox
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["chown", "0:0", "-R", "/var/atlassian/application-data/confluence"]
+          volumeMounts:
+          - name: data
+            mountPath: /var/atlassian/application-data/confluence
+          - name: felix-cache
+            mountPath: /var/atlassian/application-data/confluence/plugins-osgi-cache/felix
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          #securityContext:
+          #  runAsUser: {{ .Values.confluence.runUID }}
+          #  runAsGroup: {{ .Values.confluence.runGID }}
+          #  fsGroup: {{ .Values.confluence.runGID }}
+          #  allowPrivilegeEscalation: true
           env:
             - name: CATALINA_CONNECTOR_PROXYNAME
               value: {{ .Values.confluence.reverseProxyHost | quote }}
@@ -44,6 +59,10 @@ spec:
               value: {{ .Values.confluence.runUser | quote }}
             - name: RUN_GROUP
               value: {{ .Values.confluence.runGroup | quote }}
+            #- name: RUN_UID
+            #  value: {{ .Values.confluence.runUID | quote }}
+            #- name: RUN_GID
+            #  value: {{ .Values.confluence.runGID | quote }}
           ports:
             - name: http
               containerPort: 8090
@@ -66,6 +85,9 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /var/atlassian/application-data/confluence
+            - name: felix-cache
+              mountPath: /var/atlassian/application-data/confluence/plugins-osgi-cache/felix
+              #/var/atlassian/application-data/confluence
           resources:
 {{ toYaml .Values.resources | indent 12 }}
     {{- with .Values.nodeSelector }}
@@ -81,6 +103,10 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
       volumes:
+        - name: felix-cache
+          hostPath:
+            path: /var/atlassian/application-data/confluence/plugins-osgi-cache/felix
+            type: DirectoryOrCreate
         - name: data
         {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
@@ -88,3 +114,5 @@ spec:
         {{- else }}
           emptyDir: {}
         {{- end -}}
+        
+        
