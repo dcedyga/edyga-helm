@@ -65,15 +65,15 @@ spec:
           - sh
           - -c
           - |
-            chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.fsGroup }} /bitnami
-            if [ -d /bitnami/postgresql/data ]; then
-              chmod  0700 /bitnami/postgresql/data;
+            chown -R {{ .Values.securityContext.runAsUser }}:{{ .Values.securityContext.fsGroup }} /var/lib/postgresql/
+            if [ -d /var/lib/postgresql/data ]; then
+              chmod  0700 /var/lib/postgresql/data;
             fi
         securityContext:
           runAsUser: {{ .Values.volumePermissions.securityContext.runAsUser }}
         volumeMounts:
         - name: data
-          mountPath: /bitnami/postgresql
+          mountPath: /var/lib/postgresql/data
       {{ end }}
       containers:
       - name: {{ template "postgresql.fullname" . }}
@@ -88,22 +88,22 @@ spec:
         - name: NAMI_DEBUG
           value: "1"
         {{- end }}
-        {{- if .Values.replication.enabled }}
-        - name: POSTGRESQL_REPLICATION_MODE
-          value: "master"
-        - name: POSTGRESQL_REPLICATION_USER
-          value: {{ .Values.replication.user | quote }}
-        - name: POSTGRESQL_REPLICATION_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: {{ template "postgresql.fullname" . }}
-              key: postgresql-replication-password
-        {{- end }}
+        #{{- if .Values.replication.enabled }}
+        #- name: POSTGRESQL_REPLICATION_MODE
+        #  value: "master"
+        #- name: POSTGRESQL_REPLICATION_USER
+        #  value: {{ .Values.replication.user | quote }}
+        #- name: POSTGRESQL_REPLICATION_PASSWORD
+        #  valueFrom:
+        #    secretKeyRef:
+        #      name: {{ template "postgresql.fullname" . }}
+        #      key: postgresql-replication-password
+        #{{- end }}
         - name: POSTGRES_INITDB_ARGS
           value: {{ .Values.postgresqlInitDBArgs | quote }}
-        - name: POSTGRESQL_USERNAME
+        - name: POSTGRES_USER
           value: {{ .Values.postgresqlUsername | quote }}
-        - name: POSTGRESQL_PASSWORD
+        - name: POSTGRES_PASSWORD
           valueFrom:
             secretKeyRef:
             {{- if .Values.existingSecret }}
@@ -113,7 +113,7 @@ spec:
             {{- end }}  
               key: postgresql-password
         {{- if .Values.postgresqlDatabase }}
-        - name: POSTGRESQL_DATABASE
+        - name: POSTGRES_DB
           value: {{ .Values.postgresqlDatabase | quote }}
         {{- end }}
         - name: POD_IP
@@ -159,12 +159,12 @@ spec:
         {{ end }}
         {{ if or (.Files.Glob "files/postgresql.conf") .Values.postgresqlConfiguration }}
         - name: postgresql-config
-          mountPath: /opt/bitnami/postgresql/conf/postgresql.conf
+          mountPath: /var/lib/postgresql/data/postgresql.conf
           subPath: postgresql.conf
         {{ end }}
         {{ if or (.Files.Glob "files/pg_hba.conf") .Values.pgHbaConfiguration }}
         - name: postgresql-config
-          mountPath: /opt/bitnami/postgresql/conf/pg_hba.conf
+          mountPath: /var/lib/postgresql/data/pg_hba.conf
           subPath: pg_hba.conf
         {{ end }}
 {{- if .Values.metrics.enabled }}

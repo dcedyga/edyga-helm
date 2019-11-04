@@ -4,13 +4,12 @@
 ## global:
 ##   imageRegistry:
 
-## Bitnami PostgreSQL image version
-## ref: https://hub.docker.com/r/bitnami/postgresql/tags/
+## PostgreSQL image version
 ##
 image:
-  registry: docker.io
-  repository: bitnami/postgresql
-  tag: 10.6.0
+  registry: library
+  repository: postgres
+  tag: 10.10-alpine
   ## Specify a imagePullPolicy
   ## Defaults to 'Always' if image tag is 'latest', else set to 'IfNotPresent'
   ## ref: http://kubernetes.io/docs/user-guide/images/#pre-pulling-images
@@ -47,8 +46,8 @@ volumePermissions:
 ##
 securityContext:
   enabled: true
-  fsGroup: 1001
-  runAsUser: 1001
+  fsGroup: 70
+  runAsUser: 70
 
 replication:
   enabled: false
@@ -57,16 +56,13 @@ replication:
   slaveReplicas: 1
 postgresqlInitDBArgs: --encoding=UTF8
 ## PostgreSQL admin user
-## ref: https://github.com/bitnami/bitnami-docker-postgresql/blob/master/README.md#setting-the-root-password-on-first-run
 postgresqlUsername: postgres
 
 ## PostgreSQL password
-## ref: https://github.com/bitnami/bitnami-docker-postgresql/blob/master/README.md#setting-the-root-password-on-first-run
 ##
 # postgresqlPassword:
 
 ## Create a database
-## ref: https://github.com/bitnami/bitnami-docker-postgresql/blob/master/README.md#creating-a-database-on-first-run
 ##
 # postgresqlDatabase:
 
@@ -131,7 +127,7 @@ persistence:
   ## A manually managed Persistent Volume and Claim
   ## If defined, PVC must be created manually before volume will be bound
   # existingClaim:
-  mountPath: /bitnami/postgresql
+  mountPath: /var/lib/postgresql/data
   # storageClass: "-"
   accessModes:
     - ReadWriteOnce

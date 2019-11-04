@@ -1,9 +1,9 @@
 dependencies:
 - name: postgresql
   repository: file://../postgresql
-  version: 3.0.0
+  version: 4.0.0
 - name: mysql
   repository: file://../mysql
   version: 0.10.2
-digest: sha256:6fc26b13d4b3319b5665d7a73022c1bdb2880766a2aa1898e97d8812c4ca8a28
-generated: 2018-12-09T07:21:20.957952Z
+digest: sha256:d48f7ec553667d36880fbe7d432171acf52d9b6153ccd44f6331f00a59cb27b6
+generated: 2019-11-02T16:46:37.134677Z

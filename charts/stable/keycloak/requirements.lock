@@ -1,0 +1,6 @@
+dependencies:
+- name: postgresql
+  repository: file://../postgresql
+  version: 4.0.0
+digest: sha256:6688573aa92454bad8926dacfedbeb0cf43fe007561e8506008ebcffed039163
+generated: 2019-11-02T16:49:35.409128Z

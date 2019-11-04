@@ -10,9 +10,8 @@ $ helm install stable/postgresql
 
 ## Introduction
 
-This chart bootstraps a [PostgreSQL](https://github.com/bitnami/bitnami-docker-postgresql) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart bootstraps a [PostgreSQL deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
-Bitnami charts can be used with [Kubeapps](https://kubeapps.com/) for deployment and management of Helm Charts in clusters.
 
 ## Prerequisites
 
@@ -49,7 +48,7 @@ The following tables lists the configurable parameters of the PostgreSQL chart a
 |-----------------------------------------------|------------------------------------------------------|---------------------------------------------------------- |
 | `global.imageRegistry`                        | Global Docker Image registry                         | `nil`                                                     |
 | `image.registry`                              | PostgreSQL Image registry                            | `docker.io`                                               |
-| `image.repository`                            | PostgreSQL Image name                                | `bitnami/postgresql`                                      |
+| `image.repository`                            | PostgreSQL Image name                                | `postgresql`                                      |
 | `image.tag`                                   | PostgreSQL Image tag                                 | `{VERSION}`                                               |
 | `image.pullPolicy`                            | PostgreSQL Image pull policy                         | `Always`                                                  |
 | `image.pullSecrets`                           | Specify Image pull secrets                           | `nil` (does not add image pull secrets to deployed pods)  |
@@ -77,7 +76,7 @@ The following tables lists the configurable parameters of the PostgreSQL chart a
 | `service.loadBalancerIP`                      | loadBalancerIP if service type is `LoadBalancer`     | `nil`                                                     |
 | `persistence.enabled`                         | Enable persistence using PVC                         | `true`                                                    |
 | `persistence.existingClaim`                   | Provide an existing `PersistentVolumeClaim`          | `nil`                                                     |
-| `persistence.mountPath`                       | Path to mount the volume at                          | `/bitnami/postgresql`                                     |
+| `persistence.mountPath`                       | Path to mount the volume at                          | `/var/lib/postgresql/data`                                     |
 | `persistence.storageClass`                    | PVC Storage Class for PostgreSQL volume              | `nil`                                                     |
 | `persistence.accessMode`                      | PVC Access Mode for PostgreSQL volume                | `ReadWriteOnce`                                           |
 | `persistence.size`                            | PVC Storage Request for PostgreSQL volume            | `8Gi`                                                     |
@@ -146,7 +145,7 @@ Alternatively, you can specify PostgreSQL configuration parameters using the `po
 
 ## Initialize a fresh instance
 
-The [Bitnami PostgreSQL](https://github.com/bitnami/bitnami-docker-postgresql) image allows you to use your custom scripts to initialize a fresh instance. In order to execute the scripts, they must be located inside the chart folder `files/docker-entrypoint-initdb.d` so they can be consumed as a ConfigMap.
+The [PostgreSQL] image allows you to use your custom scripts to initialize a fresh instance. In order to execute the scripts, they must be located inside the chart folder `files/docker-entrypoint-initdb.d` so they can be consumed as a ConfigMap.
 
 Alternatively, you can specify custom scripts using the `initdbScripts` parameter as dict.
 
@@ -165,7 +164,7 @@ $ kubectl scale statefulset my-postgresql-slave --replicas=3
 
 ## Persistence
 
-The [Bitnami PostgreSQL](https://github.com/bitnami/bitnami-docker-postgresql) image stores the PostgreSQL data and configurations at the `/bitnami/postgresql` path of the container.
+The [PostgreSQL]image stores the PostgreSQL data and configurations at the `postgresql` path of the container.
 
 Persistent Volume Claims are used to keep the data across deployments. This is known to work in GCE, AWS, and minikube.
 See the [Configuration](#configuration) section to configure the PVC or to disable persistence.
@@ -251,7 +250,7 @@ $ psql -U postgres
 postgres=# drop database DATABASE_NAME;
 postgres=# create database DATABASE_NAME;
 postgres=# create user USER_NAME;
-postgres=# alter role USER_NAME with password 'BITNAMI_USER_PASSWORD';
+postgres=# alter role USER_NAME with password 'USER_PASSWORD';
 postgres=# grant all privileges on database DATABASE_NAME to USER_NAME;
 postgres=# alter database DATABASE_NAME owner to USER_NAME;
 ```

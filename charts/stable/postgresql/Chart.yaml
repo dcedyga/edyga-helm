@@ -1,6 +1,6 @@
 name: postgresql
-version: 3.0.0
-appVersion: 10.6.0
+version: 4.0.0
+appVersion: 10.10
 description: Chart for PostgreSQL, an object-relational database management system (ORDBMS) with an emphasis on extensibility and on standards-compliance.
 keywords:
 - postgresql
@@ -10,12 +10,6 @@ keywords:
 - replication
 - cluster
 home: https://www.postgresql.org/
-icon: https://bitnami.com/assets/stacks/postgresql/img/postgresql-stack-110x117.png
-sources:
-- https://github.com/bitnami/bitnami-docker-postgresql
 maintainers:
-- name: Bitnami
-  email: containers@bitnami.com
-- name: desaintmartin
-  email: cedric@desaintmartin.fr
-engine: gotpl
+  - name: davidcarbajosatesoro
+    email: david.carbajosa@pleyadesltd.com
